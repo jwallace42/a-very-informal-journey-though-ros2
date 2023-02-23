@@ -4,7 +4,6 @@
 #include <thread>
 
 #include "rclcpp/rclcpp.hpp"
-#include "node_thread.hpp"
 
 #include "lifecycle_msgs/msg/state.hpp"
 #include "lifecycle_msgs/msg/transition.hpp"
@@ -209,11 +208,26 @@ int main(int argc, char **argv)
   rclcpp::init(argc, argv);
   rclcpp::executors::SingleThreadedExecutor executor;
   auto node = std::make_shared<rclcpp::Node>("manager");
+  executor.add_node(node);
   the_node::LifecycleClient client_one(node, "managed_node_one");
   the_node::LifecycleClient client_two(node, "managed_node_two");
 
-  std::unique_ptr<nav2_util::NodeThread> node_thread = std::make_unique<nav2_util::NodeThread>(node);
+  auto spin_executor = [&executor]()
+  {
+    executor.spin();
+  };
+
+  auto cancel_executor = [&executor]()
+  {
+    executor.cancel();
+  };
+
+  std::thread executor_thread(spin_executor);
   the_node::caller_script(client_one, client_two);
+  std::thread cancel_executor_thread(cancel_executor);
+
+  executor_thread.join();
+  cancel_executor_thread.join();
 
   rclcpp::shutdown();
   return 0;
