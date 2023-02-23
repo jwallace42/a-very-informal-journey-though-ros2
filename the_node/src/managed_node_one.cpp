@@ -4,8 +4,7 @@
 namespace the_node
 {
 
-
- class ManagedNodeOne : public rclcpp_lifecycle::LifecycleNode
+class ManagedNodeOne : public rclcpp_lifecycle::LifecycleNode
 {
  public:
   explicit ManagedNodeOne(const rclcpp::NodeOptions &options) :
