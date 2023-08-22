@@ -20,16 +20,18 @@ int main(int argc, char ** argv)
   occ_grid_msg.info.width = 10;
   occ_grid_msg.info.height = 10;
   occ_grid_msg.info.origin.orientation.w = 1.0;
-  occ_grid_msg.data.assign(10 * 10, 100);
 
-  rclcpp::Time time_stamp = node->now();
   std::string topic_name = "occupancy_grid";
-  writer_->write<nav_msgs::msg::OccupancyGrid>(occ_grid_msg, topic_name, time_stamp);
 
-  occ_grid_msg.data.assign(10 * 10, 0);
-  rclcpp::Duration one_second(1, 0);
-  time_stamp = node->now() + one_second;
-  writer_->write<nav_msgs::msg::OccupancyGrid>(occ_grid_msg, topic_name, time_stamp);
+  rclcpp::Rate loop_rate(10);
+  int i = 0;
+  while (rclcpp::ok() && i < 100) {
+    occ_grid_msg.data.assign(10 * 10, i);
+    rclcpp::Time time_stamp = node->now();
+    writer_->write<nav_msgs::msg::OccupancyGrid>(occ_grid_msg, topic_name, time_stamp);
+    ++i;
+    loop_rate.sleep();
+   }
 
   return 0;
 }
